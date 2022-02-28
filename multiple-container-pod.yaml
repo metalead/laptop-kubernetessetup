@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: busyb
+  name: busyb
+spec:
+  containers:
+  - name: debian
+    image: debian
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello; sleep 30;done"]
+  - name: busyb2
+    image: debian
+    command: ["/bin/sh"]
+    args: ["-c", "ls; sleep 3600"]
+  restartPolicy: Never

@@ -1,0 +1,4 @@
+NAME         CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%   
+k8s-master   203m         6%     1202Mi          69%       
+node1        95m          3%     864Mi           49%       
+node2        89m          2%     918Mi           52%       

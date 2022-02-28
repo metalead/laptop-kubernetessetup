@@ -1,0 +1,811 @@
+    1  ip addr
+    2  ifup enp0s3
+    3  ip addr
+    4  reboot
+    5  ipconfig
+    6  ifconfig
+    7  bash
+    8  ip addr
+    9  init 0
+   10  yum update
+   11  cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+   12  br_netfilter
+   13  EOF
+   14  cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+   15  net.bridge.bridge-nf-call-ip6tables = 1
+   16  net.bridge.bridge-nf-call-iptables = 1
+   17  EOF
+   18  sudo sysctl --system
+   19  cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+   20  [kubernetes]
+   21  name=Kubernetes
+   22  baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+   23  enabled=1
+   24  gpgcheck=1
+   25  repo_gpgcheck=1
+   26  gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+   27  exclude=kubelet kubeadm kubectl
+   28  EOF
+   29  sudo setenforce 0
+   30  sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+   31  sudo yum install -y kubelet-1.20.0-0 kubeadm-1.20.0-0 kubectl-1.20.0-0 --disableexcludes=kubernetes
+   32  yum install docker
+   33  systemctl enable docker
+   34  ip addr
+   35  systemctl start docker
+   36  ip addr
+   37  systemctl start kubelet
+   38  kubeadm init --apiserver-advertise-address=192.168.31.21 --pod-network-cidr=10.190.0.5/16
+   39  swapoff -a && sed -i '/ swap / s/^/#/' /etc/fstab
+   40  shutdown now
+   41  ip addr
+   42  echo "192.168.31.140 k8s-master" >> /etc/hosts
+   43  cat /etc/hosts
+   44  echo "192.168.31.140 node1" >> /etc/hosts
+   45  echo "192.168.31.97 node2" >> /etc/hosts
+   46  echo "192.168.31.21 k8s-master" >> /etc/hosts
+   47  cat /etc/hosts
+   48  vi /etc/hosts
+   49  cat /etc/hosts
+   50  ping node1
+   51  ping node2
+   52  sudo systemctl enable --now kubelet
+   53  kubeadm init --apiserver-advertise-address=192.168.31.21 --pod-network-cidr=10.190.0.5/16
+   54  mkdir -p $HOME/.kube
+   55  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+   56  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+   57  kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+   58  rpm -qa | grep kube
+   59  kubectl get nodes
+   60  systemctl disable firewalld && systemctl stop firewalld
+   61  kubectl get nodes
+   62  kubectl get po -n kube-system
+   63  mkdir replicaset
+   64  cd replicaset/
+   65  vi frontend.yaml
+   66  kubectl apply -f frontend.yaml 
+   67  vi frontend.yaml
+   68  cat frontend.yaml 
+   69  kubectl apply -f frontend.yaml 
+   70  kubectl get rs
+   71  kubectl get po
+   72  kubectl delete po frontend-f689x
+   73  kubectl get po
+   74  df -kh
+   75  du -csh *
+   76  cd
+   77  df -kh
+   78  du -csh *
+   79  cd /
+   80  du -csh *
+   81  cd
+   82  cd replicaset/
+   83  ll
+   84  cat frontend.yaml 
+   85  vi frontend.yaml 
+   86  cp frontend.yaml frontend-1-httpd.yaml
+   87  ll
+   88  kubectl apply -f frontend-1-httpd.yaml 
+   89  kubectl get po
+   90  kubectl apply -help
+   91  kubectl apply --help
+   92  kubectl delete --help
+   93  kubectl delete frontend-1-httpd.yaml 
+   94  kubectl delete rs httpdfrontend
+   95  kubectl get po
+   96  kubectl delete frontend
+   97  kubectl delete rs frontend
+   98  kubectl get po
+   99  df -kh
+  100  kubectl get rs
+  101  ls -lrth
+  102  cd replicaset/
+  103  ll
+  104  kubectl create -f frontend.yaml
+  105  kubectl get rs
+  106  kubectl get po
+  107  cat frontend.yaml 
+  108  vi frontend.yaml 
+  109  cat /etc/hosts
+  110  kubectl get po -o wide
+  111  kubectl get nodes
+  112  ssh node1
+  113  kubectl describe node node1
+  114  kubectl describe node node1 | grep storage
+  115  kubectl taint nodes node1 key1=value1:NoSchedule
+  116  kubectl get po -o wide
+  117  kubectl taint nodes node1 key1=value1:NoExecute
+  118  kubectl get po -o wide
+  119  kubectl describe node1
+  120  kubectl describe node node1
+  121  kubectl taint nodes node1 key1=value1:NoExecute-
+  122  kubectl taint nodes node1 key1=value1:NoSchedule-
+  123  kubectl get nodes
+  124  kubectl taint nodes node1 key1=value1:NoExecute
+  125  kubectl get nodes
+  126  kubectl get po
+  127  ls
+  128  cd replicaset/
+  129  ll
+  130  kubectl delete -f frontend-1-httpd.yaml 
+  131  kubectl get po
+  132  grep -i banner /etc/ssh/sshd_config 
+  133  /etc/init.d/sshd restart
+  134  bash 
+  135  /etc/init.d/sshd restart
+  136  ssh server.ip.or.hostname
+  137  cat /etc/hosts
+  138  ssh 192.168.31.97
+  139  kubectl get po -o wide
+  140  cat /etc/hosts
+  141  ssh 192.168.31.140
+  142  ssh 192.168.31.97
+  143  init 0
+  144  cat /etc/hosts
+  145  ssh node1
+  146  curl -LO https://get.helm.sh/helm-v3.3.0-linux-amd64.tar.gz
+  147  tar zxvf helm-v3.3.0-linux-amd64.tar.gz
+  148  sudo mv ./linux-amd64/helm /usr/local/bin/helm
+  149  helm version --short
+  150  helm repo list
+  151  helm repo add bitnami https://charts.bitnami.com/bitnami
+  152  helm install my-wp-install bitnami/wordpress
+  153  helm upgrade my-wp-install bitnami/wordpress
+  154  helm history my-wp-install
+  155  helm uninstall my-wp-install
+  156  helm create my-nginx
+  157  tree my-nginx
+  158  yum install tree
+  159  tree my-nginx
+  160  helm install test-my-nginx ./my-nginx-0.1.0.tgz
+  161  helm package my-nginx/
+  162  helm install test-my-nginx ./my-nginx-0.1.0.tgz
+  163  tree .
+  164  kubectl get pods -n kube-system
+  165  kubectl describe pods -n kube-system etcd-controller
+  166  kubectl describe pods -n kube-system etcd-k8s-master
+  167  kubectl logs -n kube-system etcd-controller
+  168  kubectl logs -n kube-system etcd-k8s-master
+  169  ls /etc/kubernetes/manifests/
+  170  cat /etc/kubernetes/manifests/etcd.yaml 
+  171  kubectl create namespace my-ns
+  172  kubectl get ns
+  173  root@172.19.40.40's password:
+  174       ┌────────────────────────────────────────────────────────────────────┐
+  175       │                        • MobaXterm 20.3 •                          │
+  176       │            (SSH client, X-server and networking tools)             │
+  177       │                                                                    │
+  178       │ ➤ SSH session to root@172.19.40.40                                 │
+  179       │   • SSH compression : ✔                                            │
+  180       │   • SSH-browser     : ✔                                            │
+  181       │   • X11-forwarding  : ✘  (disabled or not supported by server)     │
+  182       │   • DISPLAY         : 192.168.31.113:0.0                           │
+  183       │                                                                    │
+  184       │ ➤ For more info, ctrl+click on help or visit our website           │
+  185       └────────────────────────────────────────────────────────────────────┘
+  186  Last login: Wed Feb 23 10:05:04 2022
+  187  [root@vms ~]#
+  188  [root@vms ~]#
+  189  [root@vms ~]#
+  190  [root@vms ~]#
+  191  [root@vms ~]#
+  192  [root@vms ~]#
+  193  [root@vms ~]# cat /vol1/senm/etc/sed.json| grep vcenter_ip_vio_mgt
+  194  "vcenter_ip_vio_mgt":"172.19.40.41",
+  195  "vcenter_ip_vio_mgt_upgrade":"172.19.40.51",
+  196  [root@vms ~]# cd /vol1/log4jmedia/
+  197  [root@vms log4jmedia]# ll
+  198  total 456444
+  199  -rw-r--r--. 1 root root   1425392 Feb 23 07:06 CXP9042189-R1A.zip
+  200  -rw-r--r--. 1 root root      8887 Feb  4 13:12 CXP9042194-R1B.zip
+  201  -rw-r--r--. 1 root root 232177736 Feb  4 13:13 CXP9042202-R1A.zip
+  202  -rw-r--r--. 1 root root     16312 Feb  4 13:12 CXP9042203-R1A.zip
+  203  -rw-r--r--. 1 root root      7306 Dec 22 16:47 OMBSL_LOG4J_Security_vul_Fix_NBU_8.2_Readme.txt
+  204  -rw-r--r--. 1 root root   1587200 Dec 22 16:47 OMBSL_LOG4J_Security_vul_Fix_NBU_8.2.tar
+  205  drwxr-xr-x. 2 root root      4096 Feb 23 07:10 SignatureFiles
+  206  -rw-r--r--. 1 root root     11256 Dec 23 13:06 vCenter_Log4j_CXP9042203-1.0.0.tar.gz
+  207  -rwxrwxrwx. 1 root root     44319 Dec 23 07:58 vc_log4j_mitigator.py
+  208  -rw-r--r--. 1 root root 232103015 Dec 23 13:07 VIO_Log4j_CXP9042202-1.0.0.tar.gz
+  209  [root@vms log4jmedia]#
+  210  [root@vms log4jmedia]#
+  211  [root@vms log4jmedia]#
+  212  [root@vms log4jmedia]#
+  213  [root@vms log4jmedia]# cp vc_log4j_mitigator.py /tmp/
+  214  [root@vms log4jmedia]# cd /tmp/
+  215  [root@vms tmp]# ll
+  216  total 44
+  217  drwx------. 3 root root    17 Jan 20 17:51 systemd-private-b62a405ea8664233a271470fa39dd619-httpd.service-3Po0eM
+  218  drwx------. 3 root root    17 Jan 20 17:53 systemd-private-b62a405ea8664233a271470fa39dd619-ntpd.service-t9rBjH
+  219  drwx------. 3 root root    17 Jan 20 17:51 systemd-private-b62a405ea8664233a271470fa39dd619-systemd-machined.servi            ce-6o3zqP
+  220  -rwxr-xr-x. 1 root root 44319 Feb 23 10:16 vc_log4j_mitigator.py
+  221  drwx------. 2 root root     6 Feb 22 20:30 vmware-root_841-4013329999
+  222  [root@vms tmp]# cat /vol1/senm/etc/sed.json| grep vcenter_os_password
+  223  "vcenter_os_password":"Ericsson01!",
+  224  [root@vms tmp]#
+  225  [root@vms tmp]#
+  226  [root@vms tmp]# ssh root@172.19.40.41
+  227  VMware vCenter Server Appliance 6.7.0.48000
+  228  Type: vCenter Server with an embedded Platform Services Controller
+  229  root@172.19.40.41's password:
+  230  Connected to service
+  231      * List APIs: "help api list"
+  232      * List Plugins: "help pi list"
+  233      * Launch BASH: "shell"
+  234  Command> shell
+  235  Shell access is granted to root
+  236  root@albenm1-vc1 [ ~ ]#
+  237  root@albenm1-vc1 [ ~ ]# scp root@172.19.40.40:/tmp/vc_log4j_mitigator.py /tmp
+  238  The authenticity of host '172.19.40.40 (172.19.40.40)' can't be established.
+  239  ECDSA key fingerprint is SHA256:+P9arDWpIVwHOBE2Tmor/Z5VbNbDv9ma669wY+jLbo0.
+  240  Are you sure you want to continue connecting (yes/no)? yes
+  241  root@172.19.40.40's password:
+  242  vc_log4j_mitigator.py                                                           100%   43KB  25.8MB/s   00:00
+  243  root@albenm1-vc1 [ ~ ]# cd /tmp/
+  244  root@albenm1-vc1 [ /tmp ]# ll
+  245  bash: ll: command not found
+  246  root@albenm1-vc1 [ /tmp ]# ls -lrth
+  247  total 44K
+  248  drwx------ 2 root            root   40 Jan 20 17:22 vmware-root_1163-3988097519
+  249  drwxr-xr-x 2 vapiEndpoint    users  40 Jan 20 17:23 hsperfdata_vapiEndpoint
+  250  drwxr-xr-x 2 eam             users  40 Jan 20 17:23 hsperfdata_eam
+  251  drwxr-xr-x 2 vapiEndpoint    users  40 Jan 20 17:23 jna-vapiEndpoint
+  252  drwx------ 2 eam             users  40 Jan 20 17:23 eam5247767006915556688
+  253  drwx------ 2 eam             users  40 Jan 20 17:23 eam1648450217305817193
+  254  drwxr-xr-x 2 content-library users  40 Jan 20 17:24 hsperfdata_content-library
+  255  drwxr-xr-x 2 root            root   40 Jan 20 17:24 jna-3506402
+  256  drwxr-xr-x 2 root            root   40 Jan 20 17:24 jna-root
+  257  drwxr-xr-x 3 root            root   60 Jan 20 17:25 vmware
+  258  drwxr-xr-x 2 content-library users  40 Jan 20 17:25 jna-content-library
+  259  drwx------ 2 root            root   40 Jan 21 09:43 hsperfdata_root
+  260  drwx------ 2 root            root   40 Jan 21 13:59 vmware-root
+  261  drwxr-xr-x 2 vsphere-client  users  40 Feb  3 11:47 hsperfdata_vsphere-client
+  262  drwxr-xr-x 2 vsphere-ui      users  40 Feb  3 11:48 hsperfdata_vsphere-ui
+  263  -rwxr-xr-x 1 root            root  44K Feb 23 10:19 vc_log4j_mitigator.py
+  264  root@albenm1-vc1 [ /tmp ]#
+  265  root@albenm1-vc1 [ /tmp ]# ^C
+  266  root@albenm1-vc1 [ /tmp ]#
+  267  root@albenm1-vc1 [ /tmp ]# python vc_log4j_mitigator.py -r
+  268  2022-02-23T10:30:31 INFO main: Script version: 1.6.0
+  269  2022-02-23T10:30:31 INFO main: vCenter type: Version: 6.7.0.48000; Build: 18010531; Deployment type: embedded; Gat            eway: False; VCHA: False; Windows: False;
+  270  2022-02-23T10:30:31 INFO main: Running in dryrun mode.
+  271  2022-02-23T10:30:49 INFO print_summary:
+  272  =====     Summary     =====
+  273  No vulnerable files found!
+  274  Total found: 0
+  275  Log file: /var/log/vmsa-2021-0028_2022_02_23_09_30_31.log
+  276  ===========================
+  277  2022-02-23T10:30:49 INFO main: Done.
+  278  root@albenm1-vc1 [ /tmp ]#
+  279  root@albenm1-vc1 [ /tmp ]# exit
+  280  logout
+  281  kubectl get no
+  282  kubectl get po
+  283  kubectl delete po test-my-nginx-745ffd5486-f89r8
+  284  kubectl run nginx --image=nginx --restart=Never
+  285  kubectl get no
+  286  kubectl get namespaces
+  287  [root@k8s-master ~]#
+  288  [root@k8s-master ~]# kubectl run nginx --image=nginx --restart=Never
+  289  pod/nginx created
+  290  [root@k8s-master ~]#
+  291  [root@k8s-master ~]# kubectl run nginx --image=nginx --restart=Never
+  292  pod/nginx created
+  293  [root@k8s-master ~]#
+  294  yum install bash-completion
+  295  source /usr/share/bash-completion/bash_completion
+  296  echo 'source <(kubectl completion bash)' >>~/.bashrc
+  297  echo 'alias k=kubectl' >>~/.bashrc
+  298  echo 'complete -F __start_kubectl k' >>~/.bashrc
+  299  kubectl get no
+  300  kubectl run nginx --image=nginx --restart=Never --namespace myns
+  301  kubectl get no
+  302  kubectl get namespaces
+  303  kubectl run nginx --image=nginx --restart=Never --namespace my-ns
+  304  kubectl run nginx2 --image=nginx --restart=Never --namespace my-ns
+  305  kubectl run nginx3 --image=nginx --restart=Never 
+  306  kubectl get po
+  307  kubectl get no
+  308  cat /etc/hosts
+  309  ssh node1
+  310  ssh node2
+  311  kubectl get no
+  312  ssh node1
+  313  kubectl get no
+  314  kubectl describe nodes
+  315  kubectl describe node node1
+  316  kubectl get no
+  317  kubectl describe node node1
+  318  ssh node1
+  319  kubectl get no
+  320  kubectl get po
+  321  kubectl get po -n my-ns
+  322  kubectl run httpd1 --image=httpd --restart=Never --namespace my-ns
+  323  kubectl run httpd2 --image=httpd --restart=Never 
+  324  kubectl get po -po
+  325  kubectl get po 
+  326  kubectl get po -n my-ns
+  327  kubectl get po 
+  328  kubectl get po --all-namespaces
+  329  kubectl get pods -o=jsonpath="{.items[*]['metadata.name',
+  330  'metadata.namespace']}"
+  331  kubectl get pods -o=jsonpath="{.items[*]['metadata.name','metadata.namespace']}"
+  332  kubectl get pods -o json
+  333  mkdir practiceset
+  334  cd practiceset/
+  335  kubectl run nginx --image=nginx --restart=Never --dry-run -o yaml >nginx-pod.yaml
+  336  kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml >nginx-pod.yaml
+  337  ls -lrth
+  338  cat nginx-pod.yaml 
+  339  kubectl create -f nginx-pod.yaml 
+  340  vi nginx-pod.yaml 
+  341  kubectl create -f nginx-pod.yaml 
+  342  kubectl get  po --all-namespaces 
+  343  kubectl get httpd2 -o yaml
+  344  kubectl get po httpd2 -o yaml
+  345  ls -lrth
+  346  kubectl get po httpd2 -o yaml >
+  347  kubectl get po httpd2 -o yaml > pod-to-yaml.yaml
+  348  ls -lrth
+  349  cat pod-to-yaml.yaml 
+  350  kubectl get po httpd1 -o yaml --export
+  351  kubectl get po httpd2 -o yaml --export
+  352  kubectl get --help
+  353  kubectl get --help | grep export
+  354  kubectl delete po nginx
+  355  ls -lrth
+  356  kubectl delete -f nginx-pod.yaml
+  357  kubectl delete po nginx --grace-period=0 --force
+  358  kubectl run nginx --image=nginx --restart=Never 
+  359  kubectl get po
+  360  kubectl delete po nginx --grace-period=0 --force
+  361  kubectl get po
+  362  kubectl run nginx --image=nginx:1.17.4 --restart=Never --port=80
+  363  kubectl get po
+  364  kubectl get events
+  365  kubectl get po
+  366  kubectl set image pod/nginx nginx=nginx:1.15-alpine
+  367  kubectl get events
+  368  kubectl get po
+  369  kubectl describe po nginx
+  370  kubeclt edit po nginx
+  371  kubectl edit po nginx
+  372  kubectl get no
+  373  kubectl get po --all-namespaces 
+  374  kubectl delete pod --all-namespaces 
+  375  kubectl delete pod --all --all-namespaces 
+  376  kubectl get po --all-namespaces 
+  377  kubectl get po nginx -o jsonpath='{.spec.containers[].image}{"\n"}'
+  378  kubectl run nginx --image=nginx --restart=Never 
+  379  kubectl get po 
+  380  kubectl get po nginx -o jsonpath='{.spec.containers[].image}{"\n"}'
+  381  kubectl exec -it nginx /bin/sh
+  382  kubectl exec -it nginx /bin/bash
+  383  kubectl exec nginx -- /bin/bash
+  384  kubectl exec nginx -it /bin/bash
+  385  kubectl exec nginx --bin/bash
+  386  kubectl exec nginx -- bin/bash
+  387  kubectl exec -it nginx /bin/bash
+  388  kubectl get po -o wide
+  389  kubectl run nginx --image=centos --restart=Never 
+  390  kubectl run centos --image=centos --restart=Never 
+  391  kubectl get po -o wide
+  392  kubectl get eventsnts
+  393  kubectl get events
+  394  kubectl get po -o wide
+  395  kubectl describe centos
+  396  kubectl get po -o wide
+  397  kubectl run busybox --image=busybox --restart=Never -- ls
+  398  kubectl logs busybox
+  399  kubectl get no
+  400  sudo firewall-cmd --add-port=10250/tcp --permanent
+  401  sudo firewall-cmd --reload
+  402  sudo firewall-cmd --list-all
+  403  sudo firewall-cmd --reloadkubectl logs busybox
+  404  kubectl logs busybox
+  405  systemctl restart kubectl
+  406  ssh node1
+  407  systemctl restart kubelet
+  408  kubectl logs busybox
+  409  systemctl restart kubelet
+  410  kubectl get po
+  411  kubectl logs busybox -p
+  412  kubectl logs nginx -p
+  413  iptables --flush
+  414  iptables -tnat --flush
+  415  systemctl restart docker
+  416  ssh node1
+  417  kubectl logs nginx -p
+  418  kubectl get po
+  419  kubectl delete po busybox centos nginx
+  420  kubectl run busybox --image=busybox --restart=Never -- ls
+  421  kubectl get po
+  422  df -kh
+  423  kubectl get events
+  424  kubectl get nodes
+  425  kubectl cluster-info dump
+  426  ip addr
+  427  ssh node 1
+  428  ssh node2
+  429  systemctl daemon-reload
+  430  systemctl restart kubelet
+  431  kubectl get po
+  432  kubectl get po --all-namespaces 
+  433  kubectl run busybox --image=busybox --restart=Never -- /bin/sh -c
+  434  kubectl run busyb --image=busybox --restart=Never -- /bin/sh -c "sleep 3600"
+  435  kubectl get po
+  436  kubectl run busynginx --image=nginx --restart=Never 
+  437  kubectl get po
+  438  kubectl get logs busyb
+  439  kubectl  logs busyb -p]
+  440  kubectl  logs busyb -p
+  441  kubectl  logs busyb 
+  442  kubectl run busybox --image=nginx --restart=Never -it -- echo "How are
+  443  you"
+  444  kubectl run busybox1 --image=nginx --restart=Never -it -- echo "How are
+  445  you"
+  446  kubectl run busybox1 --image=nginx --restart=Never -it -- echo "How are you Guys"
+  447  kubectl run busybox2 --image=nginx --restart=Never -it -- echo "How are you Guys"
+  448  kubectl get po
+  449  kubectl delete po busybox busybox1 busybox2
+  450  kubectl get po
+  451  kubectl delete po --all --all-namespaces 
+  452  kubectl get po
+  453  kubectl run busyb --image=busybox --restart=Never -- /bin/sh -c "sleep 3600"
+  454  kubectl get po
+  455  kubectl delete po busyb
+  456  kubectl create deploy myservicedep --image=httpd --replicas=3 --dry-run=client -o yaml >deployment.yaml
+  457  ll
+  458  kubectl create -f deployment.yaml 
+  459  cat deployment.yaml 
+  460  kubectl get po
+  461  kubectl exec -it myservicedep-f67f65fcd-j8vv4 /bin//bash
+  462  kubectl get po -o wide
+  463  curl http://10.190.104.39:80
+  464  curl http://10.190.104.35:80
+  465  curl http://10.190.104.40:80
+  466  kubectl logs myservicedep-f67f65fcd-j8vv4
+  467  kubectl run nginx --image=nginx --restart=Never --port=80
+  468  kubectl get po nginx --v=7
+  469  kubectl get po nginx --v=8
+  470  kubectl get po nginx --v=9
+  471  kubectl get po nginx --v=9 -o json
+  472  kubectl get po nginx --v=9 -o json | grep volume
+  473  kubectl get po -o=custom-columns="POD_NAME:.metadata.name,
+  474  POD_STATUS:.status.containerStatuses[].state"
+  475  kubectl get po -o=custom-columns="POD_NAME:.metadata.name,POD_STATUS:.status.containerStatuses[].state"
+  476  kubectl get po -o --help
+  477  kubectl get po -o custom-columns
+  478  kubectl get po -o custom-columns .metadata.name
+  479  kubectl get pods --sort-by=.metadata.name
+  480  kubectl get po -o custom-columns= .metadata.name
+  481  kubectl get po -o --custom-columns= .metadata.name
+  482  kubectl get pods--sort-by=.metadata.creationTimestamp
+  483  kubectl get pods --sort-by=.metadata.creationTimestamp
+  484  kubectl run busybox --image=busybox --restart=Never --dry-run=client -o yaml -- /bin/bash -c "sleep 3600; ls" >multi-command-container.yaml
+  485  ls 
+  486  kubectl create -f multi-command-container.yaml 
+  487  kubectl get po busybox
+  488  kubectl get logs 
+  489  kubectl logs busybox
+  490  kubectl run busybox --image=busybox --restart=Never --dry-run=client -o yaml -- bin/sh -c "sleep 3600; ls" >multi1-command-container.yaml
+  491  kubectl create -f multi1-command-container.yaml 
+  492  kubectl delete -f multi1-command-container.yaml
+  493  kubectl create -f multi1-command-container.yaml 
+  494  kubectl get logs 
+  495  kubectl get po 
+  496  kubectl logs busybox
+  497  kubectl events
+  498  kubectl get events
+  499  kubectl exec -it busybox -c /bin/bash
+  500  kubectl logs busybox -c busybox1
+  501  kubectl exec busybox -c busybox3 -- ls
+  502  kubectl exec busybox -c  -- ls
+  503  kubectl get po
+  504  ls -lrth
+  505  kubectl delete -f multi-command-container.yaml
+  506  kubectl run nginx --image=nginx --command -o yaml --dry-run=client -- sh -c 'sleep 3600' > nginx-multipod.yaml
+  507  ls -lrth
+  508  kubectl create -f nginx-multipod.yaml 
+  509  kubectl get po
+  510  kubectl delete po nginx
+  511  kubectl delete -f deployment.yaml 
+  512  kubectl get po
+  513  kubectl run nginx --image=nginx --command -o yaml --dry-run=client -- sh -c 'sleep 3600' > nginx-multipod.yaml
+  514  kubectl create -f nginx-multipod.yaml 
+  515  kubectl get po
+  516  cat nginx-multipod.yaml 
+  517  kubectl get po
+  518  ip addr
+  519  ipa
+  520  yum install ipa-server
+  521  ipa
+  522  ssh node 1
+  523  ssh node1
+  524  ssh node2
+  525  init 0
+  526  admin
+  527  history 
+  528  kubectl get po
+  529  kubectl delete pod nginx 
+  530  kubectl run busyb --image=busybox --restart=Never -- /bin/sh -c "sleep 3600" --dry-run=client -o yaml > busybox-multicontainer-after-edit.yaml'
+  531  kubectl run busyb --image=busybox --restart=Never -- /bin/sh -c "sleep 3600" --dry-run=client -o yaml > busybox-multicontainer-after-edit.yaml
+  532  cat busybox-multicontainer-after-edit.yaml 
+  533  vi busybox-multicontainer-after-edit.yaml 
+  534  history | grep yaml
+  535  ls
+  536  cat  multi-command-container.yaml 
+  537  history | grep multi
+  538  history | grep multi-command
+  539  history 
+  540  kubectl run busyb --image=busybox --restart=Never --dry-run =client -o yaml -- bin/sh -c "sleep 3600; ls" > multiple-container-pod.yaml
+  541  kubectl run busyb --image=busybox --restart=Never --dry-run=client -o yaml -- bin/sh -c "sleep 3600; ls" > multiple-container-pod.yaml
+  542  ls -lrth
+  543  cat multiple-container-pod.yaml 
+  544  vi multiple-container-pod.yaml 
+  545  kubectl create -f multiple-container-pod.yaml 
+  546  kubectl get po
+  547  kubectl delete po busyb
+  548  kubectl create -f multiple-container-pod.yaml 
+  549  kubectl get po
+  550  cat multiple-container-pod.yaml 
+  551  kubectl logs busyb  -c busyb2
+  552  kubectl logs busyb  -c busyb
+  553  kubectl exec busyb  -c busyb2 -- ls
+  554  kubectl exec busyb  -c busyb -- ls
+  555  kubectl delete -f multiple-container-pod.yaml 
+  556  vi multiple-container-pod.yaml 
+  557  cat multiple-container-pod.yaml
+  558  kubectl create -f multiple-container-pod.yaml 
+  559  kubectl exec busyb  -c busyb2 -- ls
+  560  kubectl exec busyb  -c busyb1 -- ls
+  561  kubectl delete -f multiple-container-pod.yaml 
+  562  vi multiple-container-pod.yaml 
+  563  kubectl create -f multiple-container-pod.yaml 
+  564  vi multiple-container-pod.yaml 
+  565  cat multiple-container-pod.yaml 
+  566  vi multiple-container-pod.yaml 
+  567  kubectl create -f multiple-container-pod.yaml 
+  568  vi multiple-container-pod.yaml 
+  569  kubectl create -f multiple-container-pod.yaml 
+  570  kubectl get po
+  571  vi multiple-container-pod.yaml 
+  572  kubectl delete busyb
+  573  kubectl delete po  busyb
+  574  kubectl create -f multiple-container-pod.yaml 
+  575  vi multiple-container-pod.yaml 
+  576  kubectl create -f multiple-container-pod.yaml 
+  577  vi multiple-container-pod.yaml 
+  578  cat multiple-container-pod.yaml 
+  579  kubectl create -f multiple-container-pod.yaml 
+  580  cat multiple-container-pod.yaml 
+  581  vi multiple-container-pod.yaml
+  582  cat multiple-container-pod.yaml
+  583  kubectl create -f multiple-container-pod.yaml
+  584  kubectl get po
+  585  vi multiple-container-pod.yaml
+  586  cat multiple-container-pod.yaml 
+  587  kubectl get po
+  588  kubectl delete po busyb
+  589  kubectl get po
+  590  kubectl create -f multiple-container-pod.yaml
+  591  kubectl get po
+  592  kubectl get logs
+  593  kubectl logs busyb
+  594  kubectl logs busyb busyb1
+  595  vi multiple-container-pod.yaml 
+  596  kubectl delete busyb
+  597  kubectl delete po busyb
+  598  kubectl get po
+  599  kubectl create -f multiple-container-pod.yaml
+  600  kubectl get po
+  601  kubectl logs busyb busyb1
+  602  vi multiple-container-pod.yaml 
+  603  cat multiple-container-pod.yaml 
+  604  kubectl get po
+  605  kubectl delete po busyb
+  606  kubectl create -f multiple-container-pod.yaml
+  607  kubectl get po
+  608  kubectl get events
+  609  kubectl get po
+  610  kubectl delete po busyb
+  611  kubectl get po
+  612  vi multiple-container-pod.yaml 
+  613  kubectl create -f multiple-container-pod.yaml
+  614  kubectl get po
+  615  kubectl get events
+  616  kubectl get po
+  617  kubectl logs busyb busyb1
+  618  cat multiple-container-pod.yaml 
+  619  kubectl logs busyb busyb2
+  620  vi multiple-container-pod.yaml 
+  621  kubectl get po
+  622  kubectl delete po busyb
+  623  kubectl create -f multiple-container-pod.yaml
+  624  kubectl get po
+  625  kubectl delete -f multiple-container-pod.yaml
+  626  kubectl get po
+  627  kubectl create -f multiple-container-pod.yaml
+  628  kubectl get po
+  629  kubectl logs busyb debian
+  630  vi multiple-container-pod.yaml
+  631  kubectl apply -f multiple-container-pod.yaml
+  632  kubectl get po
+  633  kubectl delete multiple-container-pod.yaml 
+  634  kubectl delete po busyb
+  635  kubectl create -f multiple-container-pod.yaml
+  636  kubectl get po
+  637  kubectl logs busyb debian
+  638  cat multiple-container-pod.ya
+  639  kubectl logs busyb busyb2 
+  640  vi multiple-container-pod.yaml 
+  641  kubectl replace -f multiple-container-pod.yaml
+  642  vi multiple-container-pod.yaml 
+  643  kubectl replace -f multiple-container-pod.yaml
+  644  kubectl get po
+  645  kubectl delete busyb
+  646  kubectl delete po busyb
+  647  kubectl create -f multiple-container-pod.yaml
+  648  kubectl get po
+  649  kubectl logs busyb busyb2
+  650  kubectl get po
+  651  kubectl delete -f multi-command-container.yaml 
+  652  kubectl delete -f multiple-container-pod.yaml 
+  653  kubectl create -f multiple-container-pod.yaml 
+  654  kubectl get po
+  655  cat multiple-container-pod.yaml 
+  656  kubectl exec busyb -c debian -- ls
+  657  kubectl top pod busyb --containers
+  658  kubectl top pod busybox --containers > file.log
+  659  kubectl top node
+  660  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+  661  kubectl top node
+  662  kubectl top pod busyb --containers
+  663  kubeadm config view | grep Subnet
+  664  kubectl  --namespace kube-system get configmap kubeadm-config -o yaml
+  665  kubectl get apiservices |egrep metrics
+  666  rm -rf /etc/kubernetes/manifests/kube-apiserver.yaml
+  667  systemctl restart kubelet.service et
+  668  systemctl restart kubelet
+  669  kubectl top nodes
+  670  kubectl get po
+  671  systemctl restart kubectl
+  672  kubectl get nodes
+  673  ssh node1
+  674  history | grep kubeadm
+  675  kubeadm init --apiserver-advertise-address=192.168.31.21 --pod-network-cidr=10.190.0.5/16
+  676  kubeadm reset
+  677  kubeadm init --apiserver-advertise-address=192.168.31.21 --pod-network-cidr=10.190.0.5/16
+  678  kubectl get no
+  679  mkdir -p $HOME/.kube
+  680  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  681   sudo chown $(id -u):$(id -g) $HOME/.kube/config
+  682  history | grep -i calico
+  683  kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+  684  ssh node1
+  685  kubectl get no
+  686  kubectl get po
+  687  kubectl create -f multiple-container-pod.yaml 
+  688  kubectl get po
+  689  kubectl top pod busybox --containers
+  690  git clone https://github.com/kubernetes-incubator/metrics-server.git
+  691  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+  692  kubectl top pods -A 
+  693  systemctl restart kubectl
+  694  kubectl get po
+  695  kubectl apply -f https://raw.githubusercontent.com/pythianarora/total-practice/master/sample-kubernetes-code/metrics-server.yaml
+  696  kubectl top pods -A 
+  697  kubectl top pod busybox --containers
+  698  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+  699  docker run --rm k8s.gcr.io/metrics-server/metrics-server:v0.6.0 --help
+  700  kubectl top pods -A 
+  701  kubectl top pod busyb --containers
+  702  docker run --rm k8s.gcr.io/metrics-server/metrics-server:v0.6.0 --help
+  703  kubectl top pod busyb --containers
+  704  kubectl get pods -n kube-system
+  705  kubectl logs metrics-server-7d945777b6-h7nzg
+  706  kubectl get logs metrics-server-7d945777b6-h7nzg
+  707  kubectl get events
+  708  kubectl get nodes
+  709  kubectl get events | grep metric
+  710  kubectl get pods -n kube-system
+  711  kubectl logs -n kube-system deploy/metrics-server
+  712  systemctl status kube-apiserver -l
+  713  kubectl edit deployments.apps -n kube-system metrics-server 
+  714  kubectl describe deployments.apps -n kube-system metrics-server 
+  715  kubectl top pods
+  716  kubectl top no
+  717  kubectl run nginx --image=httpd 
+  718  kubectl get pods 
+  719  kubectl top pods
+  720  kubectl top no
+  721  kubectl get pods  -o wide
+  722  kubectl top pod busybox --containers > file.log
+  723  kubectl top pod busyb --containers > file.log
+  724  cat file.log 
+  725  kubectl top no > file.log
+  726  cat file.log 
+  727  kubectl top pod busyb --containers > file.log
+  728  kubectl top no > node-top-file.log
+  729  ls -lrth
+  730  mkdir kubernets
+  731  rmdir kubernets
+  732  mkdir kubernetes
+  733  mv replicaset/* kubernetes/
+  734  cd kubernetes/
+  735  ll
+  736  cd
+  737  mv my-nginx kubernetes/
+  738  ls -lrth
+  739  mv deployment.yaml kubernetes/
+  740  mv replicaset kubernetes/
+  741  ls -lrth kubernetes/
+  742  ls -lrth
+  743  mv file.log kubernetes/
+  744  mv node-top-file.log kubernetes/
+  745  cat nginx-multipod.yaml 
+  746  ls -lrth
+  747  cd practiceset/
+  748  ll
+  749  cd
+  750  mv practiceset kubernetes/
+  751  ll
+  752  cat shell 
+  753  mv multiple-container-pod.yaml kubernetes/
+  754  ls -lrth kubernetes/
+  755  ls -lrth 
+  756  cat anaconda-ks.cfg 
+  757  ipa pwpolicy-show
+  758  yum install ipa -y
+  759  ipa
+  760  bash 
+  761  ls -lrth
+  762  ssh node1
+  763  kubectl get po
+  764  kubectl delete po busyb
+  765  kubectl get po
+  766  kubectl get events
+  767  kubectl get no
+  768  ssh node1
+  769  kubectl get no
+  770  ssh node2
+  771  kubectl get no
+  772  kubectl get po
+  773  kubectl delete po nginx
+  774  kubectl run multi-cont-pod --image=busybox --restart=Never --dry-run=client -o yaml >multi-cont-pod.yaml
+  775  mv multi-cont-pod.yaml kubernetes/
+  776  cd kubernetes/
+  777  cat multi-cont-pod.yaml 
+  778  vi multi-cont-pod.yaml
+  779  kubectl create -f multi-cont-pod.yaml
+  780  vi multi-cont-pod.yaml
+  781  kubectl create -f multi-cont-pod.yaml
+  782  cat multi-cont-pod.yaml 
+  783  vi multi-cont-pod.yaml
+  784  cat multi-cont-pod.yaml 
+  785  kubectl create -f multi-cont-pod.yaml
+  786  kubectl get po
+  787  kubectl exec -it multi-cont-pod -c main-container -- sh
+  788  kubectl get po
+  789  kubectl get no
+  790  kubectl get po -o wide
+  791  kubectl exec -it multi-cont-pod -c main-container -- ls
+  792  kubectl exec -it multi-cont-pod -c sidecar-container -- ls
+  793  kubectl get events
+  794  kubectl get no
+  795  kubectl get po
+  796  kubectl exec -it multi-cont-pod -c sidecar-container -- /bin/bash
+  797  kubectl exec -it multi-cont-pod -c sidecar-container -- bin/sh
+  798  kubectl logs -p
+  799  kubectl logs -p multi-cont-pod
+  800  kubectl logs -p multi-cont-pod -c sidecar-container
+  801  kubectl get po
+  802  kubectl get po -o wid
+  803  kubectl get po -o wide
+  804  yum install github -y
+  805  yum install git -y
+  806  git config --global user.name "metalead"
+  807  cd kubernetes/
+  808  git init
+  809  git add *
+  810  git status
+  811  history > history.txt
